@@ -18,6 +18,15 @@ s.options.numOutputBusChannels = 2;
 
 s.waitForBoot {
 
+	SynthDef(\recorder, {|in=0 fftbuf recbuf thresh=0.01|
+		var input = SoundIn.ar(in);
+		var chain = FFT(fftbuf, input);
+		var onsets = Onsets.kr(chain,thresh);
+		//input = Compander.ar(input, input, 0.01,1,0.01,0.005,0.1,25);
+		//amplitude.poll;
+	RecordBuf.ar(input, recbuf,loop:0,trigger:onsets);
+ }).store;
+
 	SynthDef(\combc, {|in out=0 delmod=0.01 dec=0.01 mix=0.1|
 		var sig, delsig;
 		sig = In.ar(in, 1);
@@ -25,7 +34,7 @@ s.waitForBoot {
 		3.do{|i|
 			n = (i + 1) * 0.1;
 			o = (i + 1) * 0.01;
-			e = (i + 1) * 3;
+			e = (i + 1) * 0.1;
 			delsig = CombC.ar(sig, 0.2, SinOsc.kr(delmod+o).range(0.01, n), e + dec, 0.3, delsig);
 		};
 		sig = (delsig * mix) + (sig * ( 1 - mix) );
@@ -46,47 +55,34 @@ s.waitForBoot {
 
 		~combSynth = Synth(\combc, [\in, ~combBus,\out, 0], ~effectGroup);
 
-	SynthDef(\sketch, {|t_recalibrate=0.0|
+	SynthDef(\trillraw, {|t_recalibrate=0.0|
 		var i2c_bus = 1;
 		var i2c_address = 0x30;
-		var noiseThreshold = 0.05; // float: 0-0.0625, with 0.0625 being the highest noise thresh
+		var noiseThreshold = 0.02; // float: 0-0.0625, with 0.0625 being the highest noise thresh
 		var prescalerOpt = 1; // int: 1-8 with 1 being the highest sensitivity
 		var touchsigs = DC.ar(0).dup(3); // use 3 touches
 		var centroids;
 		var out, ping;
-
-		// returns an array with format: [num_active_touches, t1_pos, t1_size, t2_pos, t2_size, t3_pos, t3_size, t4_pos, t4_size, t5_pos, t5_size]
-		//centroids = TrillCentroids.kr(i2c_bus, i2c_address, noiseThreshold, prescalerOpt, t_recalibrate);
-		//centroids.poll;
 		centroids = TrillRaw.kr(i2c_bus, i2c_address, noiseThreshold, prescalerOpt, t_recalibrate);
-
-		// // touch1 is a percussive pluck
-		// touchsigs[0] = Pluck.ar(WhiteNoise.ar, (centroids[2] > 0), 0.2, centroids[1].linexp(0.0, 1.0, 70, 300).reciprocal, 5, 0.9);
-
-		// // touch2 is a bendy PM synth
-		// touchsigs[1] = PMOsc.ar((centroids[3]+0.001) * 2500, 500, centroids[4].linexp(0.0, 2000, 0.1, 12.0), 0.1, mul: 0.5)
-		// 	* EnvGen.ar(Env.perc, (centroids[4] > 0.0), timeScale: centroids[4].linexp(50, 500, 0.3, 5.0));
-
-		// // touch3 another percussive plucky sound with pull-off behavior
-		// touchsigs[2] = Resonz.ar(
-		// 	Pluck.ar(PinkNoise.ar, (centroids[6] < 0.05), 0.2, centroids[5].linexp(0.0, 1.0, 80, 1000).reciprocal, 3, 0.5, mul: 6.0),
-		// 	centroids[5].linexp(0.0, 1.0, 800, 2400), 0.1, 4.0).tanh;
-
-
-		//out = Splay.ar(touchsigs);
 		SendReply.kr(Impulse.kr(10), "/trill", centroids);
-		//ping = EnvGen.ar(Env.perc, t_recalibrate) * SinOsc.ar(440); // make a ping every time the baseline is reset
-		//Out.ar(0, out);
 	}).add;
 
 	s.sync;
-	~tr = Synth(\sketch);
 
+	~tr = Synth(\trillraw);
 	~freqSpec = [0.25,4.0,\exp,0.001].asSpec;
 	~phaseSpec = [1,120,\linear,1].asSpec;
 	~relSpec = [0.001,2.0, \exp, 0.001].asSpec;
 	~delmodSpec = [0.0001,10.0, \exp, 0.001].asSpec;
 	~decSpec = [0.1,6.0, \exp, 0.001].asSpec;
+
+	/*buffers*/
+	~recBuf = Buffer.alloc(s, s.sampleRate*2,1);
+	~fftBuf = Buffer.alloc(s, 1024, 1);
+
+	~button_gates = [0, 0];
+	~rec_gate = 0;
+
 
 	OSCdef(\trill, {|msg| var val0,val1,val3,val7,val14,val15,val20,val29;
 
@@ -101,25 +97,31 @@ s.waitForBoot {
 
 			case
 			{ val0 != 0 } {
-				("unmapped val"++val0).postln;
-				val0 = (val0 - 0.025)/0.075;
-				("mapped val"++val0).postln;
 
-				~combSynth.set(\delmod, ~delmodSpec.map(val0); );
+			    if ( ~button_gates[0] == 0, {
+				Task({ ~button_gates.put(0, 1); "button 0 pressed".postln; ~combSynth.set(\delmod,35.0,\dec,10.0,\mix, 0.8);
+					2.wait; ~button_gates.put(0, 0); "button 0 unpressed".postln; ~combSynth.set(\delmod,0.01,\dec,0.01,\mix, 0.05 ); }).start;
+
+			    });
+
 				}
 			{ val1 != 0 } {
-				("unmapped val"++val1).postln;
-				val1 = (val1 - 0.025)/0.075;
-				("mapped val"++val1).postln;
-
-				~combSynth.set(\dec, ~decSpec.map(val1));
+				if ( ~button_gates[1] == 0, {
+				Task({ ~button_gates.put(1, 1); "button 1 pressed ".postln;
+					if ( ~rec_gate == 0, {
+						"recorder on".postln;
+					~rec1 = Synth(\recorder,[\in,0,\fftbuf, ~fftBuf,\recbuf, ~recBuf ], ~synthGroup);
+					~rec_gate = 1;
+					}, { ~rec1.free; ~rec_gate = 0; "recorder off".postln; });
+					2.wait; ~button_gates.put(1, 0); "button 1 unpressed".postln; }).start;
+			    });
 			}
 			{ val3 != 0 } {
 				("unmapped val"++val3).postln;
 				val3 = (val3 - 0.025)/0.075;
 				("mapped val"++val3).postln;
 
-				Synth(\sine1,[\bufnum, ~toybox,
+				Synth(\sine1,[\bufnum, ~recBuf,
 					\release, ~relSpec.map(val3),
 				\rate, ~freqSpec.map(val3),
 				\pos, 0.0, \out, ~combBus ], ~synthGroup); }
@@ -128,7 +130,7 @@ s.waitForBoot {
 				val7 = (val7 - 0.025)/0.075;
 				("mapped val"++val7).postln;
 
-				Synth(\sine1,[\bufnum, ~toybox,
+				Synth(\sine1,[\bufnum, ~recBuf,
 				\release, ~relSpec.map(val7),
 				\rate, ~freqSpec.map(val7),
 				\pos, 0.125, \out, ~combBus ], ~synthGroup); }
@@ -137,7 +139,7 @@ s.waitForBoot {
 				val14 = (val14 - 0.025)/0.075;
 				("mapped val"++val14).postln;
 
-				Synth(\sine1,[\bufnum, ~toybox,
+				Synth(\sine1,[\bufnum, ~recBuf,
 				\release, ~relSpec.map(val14),
 				\rate, ~freqSpec.map(val14),
 				\pos, 0.25, \out, ~combBus ], ~synthGroup); }
@@ -146,7 +148,7 @@ s.waitForBoot {
 				val15 = (val15 - 0.025)/0.075;
 				("mapped val"++val15).postln;
 
-				Synth(\sine1,[\bufnum, ~toybox,
+				Synth(\sine1,[\bufnum, ~recBuf,
 				\release, ~relSpec.map(val15),
 				\rate, ~freqSpec.map(val15),
 				\pos, 0.375, \out, ~combBus], ~synthGroup); }
@@ -155,7 +157,7 @@ s.waitForBoot {
 				val20 = (val20 - 0.025)/0.075;
 				("mapped val"++val20).postln;
 
-				Synth(\sine1,[\bufnum, ~toybox,
+				Synth(\sine1,[\bufnum, ~recBuf,
 				\release, ~relSpec.map(val20),
 				\rate, ~freqSpec.map(val20),
 				\pos, 0.5, \out, ~combBus ], ~synthGroup); }
@@ -164,7 +166,7 @@ s.waitForBoot {
 				val29 = (val29 - 0.025)/0.075;
 				("mapped val"++val29).postln;
 
-				Synth(\sine1,[\bufnum, ~toybox,
+				Synth(\sine1,[\bufnum, ~recBuf,
 				\release, ~relSpec.map(val29),
 				\rate, ~freqSpec.map(val29),
 				\pos, 0.625, \out, ~combBus ], ~synthGroup); };
