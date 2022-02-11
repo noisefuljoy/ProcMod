@@ -44,13 +44,13 @@ var sc = ~pent_opt;
 ~pent_ratios = Array.fill(287, {|i|
 	var octave = i / 41;
 	case
-	{ octave < 1; } { sc.ratios.wrapAt(i) * 0.25 }
-	{ ((octave == 1) or: (octave > 1)) and: (octave < 2) } { sc.ratios.wrapAt(i) * 0.5 }
-	{ ((octave == 2) or: (octave > 2)) and: (octave < 3)  } { sc.ratios.wrapAt(i) * 1  }
-	{ ((octave == 3) or: (octave > 3)) and: (octave < 4)  } { sc.ratios.wrapAt(i) * 2 }
-	{ ((octave == 4) or: (octave > 4)) and: (octave < 5)  } { sc.ratios.wrapAt(i) * 4 }
-	{ ((octave == 5) or: (octave > 5)) and: (octave < 6)  } { sc.ratios.wrapAt(i) * 5 }
-	{ ((octave == 6) or: (octave > 6)) and: (octave < 7)  } { sc.ratios.wrapAt(i) * 6 }
+	{ octave < 1; } { sc.ratios.wrapAt(i) * 1 }
+	{ ((octave == 1) or: (octave > 1)) and: (octave < 2) } { sc.ratios.wrapAt(i) * 2 }
+	{ ((octave == 2) or: (octave > 2)) and: (octave < 3)  } { sc.ratios.wrapAt(i) * 4  }
+	{ ((octave == 3) or: (octave > 3)) and: (octave < 4)  } { sc.ratios.wrapAt(i) * 6 }
+	{ ((octave == 4) or: (octave > 4)) and: (octave < 5)  } { sc.ratios.wrapAt(i) * 8 }
+	{ ((octave == 5) or: (octave > 5)) and: (octave < 6)  } { sc.ratios.wrapAt(i) * 10 }
+	{ ((octave == 6) or: (octave > 6)) and: (octave < 7)  } { sc.ratios.wrapAt(i) * 12 }
 });
 };
 
@@ -59,7 +59,8 @@ var sc = ~pent_opt;
 /*~br = Synth(\trillbar);
 ~flx = Synth(\trillflex);*/
 
-~toybox = Buffer.read(s, "/root/Bela/projects/CraftWithCentroid/gerri_toybox.wav");
+~toybox = Buffer.read(s, "/root/Bela/projects/craft_livecoding/Psalt_sound.wav");
+~sus = Buffer.read(s, "/root/Bela/projects/craft_livecoding/Sus_sound2.wav");
 
 
 ~fftBuf = Buffer.alloc(s, 512);
@@ -129,12 +130,13 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 			val29 = msg[29+3];
 
 			if ( val0 != 0,  {
-
-				~rateBus[0].set(~pent_ratios.wrapAt(val0));
-
 				("unmapped val"++val0).postln;
 				val0 = (val0 - 0.025)/0.075;
 				("mapped val"++val0).postln;
+
+				~rateBus[0].set(~pent_ratios.wrapAt(val0));
+
+
 				 if ( ~button_gates[0] == 0, {
 				~button_gates.put(0, 1); "button 0 pressed".postln;
 				~grain0 = Synth(\grainSampler,[\bufnum, ~toybox,
@@ -154,12 +156,13 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 			});
 
 			if ( val2 != 0,  {
-
-				~rateBus[1].set(~pent_ratios.wrapAt(val2));
-
 				("unmapped val"++val2).postln;
 				val2 = (val2 - 0.025)/0.075;
 				("mapped val"++val2).postln;
+
+				~rateBus[1].set(~pent_ratios.wrapAt(val2));
+
+
 				 if ( ~button_gates[1] == 0, {
 				~button_gates.put(1, 1); "button 2 pressed".postln;
 				~grain1 = Synth(\grainSampler,[\bufnum, ~toybox,
@@ -179,11 +182,12 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 			});
 
 			if ( val4 != 0,  {
-				~rateBus[2].set(~pent_ratios.wrapAt(val4));
-
 				("unmapped val"++val4).postln;
 				val4 = (val4 - 0.025)/0.075;
 				("mapped val"++val4).postln;
+				~rateBus[2].set(~pent_ratios.wrapAt(val4));
+
+
 				 if ( ~button_gates[2] == 0, {
 				~button_gates.put(2, 1); "button 4 pressed".postln;
 				~grain2 = Synth(\grainSampler,[\bufnum, ~toybox,
@@ -203,12 +207,12 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 			});
 
 			if ( val6 != 0,  {
-
-				~rateBus[3].set(~pent_ratios.wrapAt(val6));
-
 				("unmapped val"++val6).postln;
 				val6 = (val6 - 0.025)/0.075;
 				("mapped val"++val6).postln;
+
+				~rateBus[3].set(~pent_ratios.wrapAt(val6));
+
 				 if ( ~button_gates[3] == 0, {
 				~button_gates.put(3, 1); "button 6 pressed".postln;
 				~grain3 = Synth(\grainSampler,[\bufnum, ~toybox,
@@ -228,12 +232,13 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 			});
 
 			if ( val8 != 0,  {
-
-				~rateBus[4].set(~pent_ratios.wrapAt(val8));
-
 				("unmapped val"++val8).postln;
 				val8 = (val8 - 0.025)/0.075;
 				("mapped val"++val8).postln;
+
+				~rateBus[4].set(~pent_ratios.wrapAt(val8));
+
+
 				 if ( ~button_gates[4] == 0, {
 				~button_gates.put(4, 1); "button 8 pressed".postln;
 				~grain4 = Synth(\grainSampler,[\bufnum, ~toybox,
@@ -253,12 +258,12 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 			});
 
 			if ( val10 != 0,  {
-
-				~rateBus[5].set(~pent_ratios.wrapAt(val10));
-
 				("unmapped val"++val10).postln;
 				val10 = (val10 - 0.025)/0.075;
 				("mapped val"++val10).postln;
+
+				~rateBus[5].set(~pent_ratios.wrapAt(val10));
+
 				 if ( ~button_gates[5] == 0, {
 				~button_gates.put(5, 1); "button 10 pressed".postln;
 				~grain5 = Synth(\grainSampler,[\bufnum, ~toybox,
@@ -278,12 +283,12 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 			});
 
 			if ( val12 != 0,  {
-
-				~rateBus[6].set(~pent_ratios.wrapAt(val12));
-
 				("unmapped val"++val12).postln;
 				val12 = (val12 - 0.025)/0.075;
 				("mapped val"++val12).postln;
+
+				~rateBus[6].set(~pent_ratios.wrapAt(val12));
+
 				 if ( ~button_gates[6] == 0, {
 				~button_gates.put(6, 1); "button 12 pressed".postln;
 				~grain6 = Synth(\grainSampler,[\bufnum, ~toybox,
@@ -303,12 +308,12 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 			});
 
 			if ( val14 != 0,  {
-
-				~rateBus[7].set(~pent_ratios.wrapAt(val14));
-
 				("unmapped val"++val14).postln;
 				val14 = (val14 - 0.025)/0.075;
 				("mapped val"++val14).postln;
+
+				~rateBus[7].set(~pent_ratios.wrapAt(val14));
+
 				 if ( ~button_gates[7] == 0, {
 				~button_gates.put(7, 1); "button 14 pressed".postln;
 				~grain7 = Synth(\grainSampler,[\bufnum, ~toybox,
@@ -327,8 +332,210 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				});
 			});
 
+			/* SECOND ROW WITH SUS SOUND */
+
+			if ( val15 != 0,  {
+				("unmapped val"++val15).postln;
+				val15 = (val15 - 0.025)/0.075;
+				("mapped val"++val15).postln;
+
+				~rateBus[8].set(~pent_ratios.wrapAt(val15));
 
 
+				 if ( ~button_gates[8] == 0, {
+				~button_gates.put(8, 1); "button 0 pressed".postln;
+				~grain8 = Synth(\grainSampler,[\bufnum, ~sus,
+				\envbuf, ~sineEnv,
+				\posBus, ~posBus[8].index,
+				\release, ~relSpec.map(val15),
+				\rateBus, ~rateBus[8].index,
+				\amp, 1,
+				\out, 0 ], ~synthGroup);
+				});
+			}, {
+				 if ( ~button_gates[8] == 1, {
+
+					~grain8.set(\gate, 0);
+					~button_gates.put(8, 0); "button unpressed".postln;
+				});
+			});
+
+			if ( val17 != 0,  {
+				("unmapped val"++val17).postln;
+				val17 = (val17 - 0.025)/0.075;
+				("mapped val"++val17).postln;
+
+				~rateBus[9].set(~pent_ratios.wrapAt(val17));
+
+
+				 if ( ~button_gates[9] == 0, {
+				~button_gates.put(9, 1); "button 2 pressed".postln;
+				~grain9 = Synth(\grainSampler,[\bufnum, ~sus,
+				\envbuf, ~sineEnv,
+				\posBus, ~posBus[9].index,
+				\release, ~relSpec.map(val17),
+				\rateBus, ~rateBus[9].index,
+				\amp, 1,
+				\out, 0 ], ~synthGroup);
+				});
+			}, {
+				 if ( ~button_gates[9] == 1, {
+
+					~grain9.set(\gate, 0);
+					~button_gates.put(9, 0); "button 2 unpressed".postln;
+				});
+			});
+
+			if ( val19 != 0,  {
+				("unmapped val"++val19).postln;
+				val19 = (val19 - 0.025)/0.075;
+				("mapped val"++val19).postln;
+				~rateBus[10].set(~pent_ratios.wrapAt(val19));
+
+
+				 if ( ~button_gates[10] == 0, {
+				~button_gates.put(10, 1); "button 4 pressed".postln;
+				~grain10 = Synth(\grainSampler,[\bufnum, ~sus,
+				\envbuf, ~sineEnv,
+				\posBus, ~posBus[10].index,
+				\release, ~relSpec.map(val19),
+				\rateBus, ~rateBus[10].index,
+				\amp, 1,
+				\out, 0 ], ~synthGroup);
+				});
+			}, {
+				 if ( ~button_gates[10] == 1, {
+
+					~grain10.set(\gate, 0);
+					~button_gates.put(10, 0); "button 4 unpressed".postln;
+				});
+			});
+
+			if ( val21 != 0,  {
+				("unmapped val"++val21).postln;
+				val21 = (val21 - 0.025)/0.075;
+				("mapped val"++val21).postln;
+
+				~rateBus[11].set(~pent_ratios.wrapAt(val21));
+
+				 if ( ~button_gates[11] == 0, {
+				~button_gates.put(11, 1); "button 6 pressed".postln;
+				~grain11 = Synth(\grainSampler,[\bufnum, ~sus,
+				\envbuf, ~sineEnv,
+				\posBus, ~posBus[11].index,
+				\release, ~relSpec.map(val21),
+				\rateBus, ~rateBus[11].index,
+				\amp, 1,
+				\out, 0 ], ~synthGroup);
+				});
+			}, {
+				 if ( ~button_gates[11] == 1, {
+
+					~grain11.set(\gate, 0);
+					~button_gates.put(11, 0); "button 6 unpressed".postln;
+				});
+			});
+
+			if ( val23 != 0,  {
+				("unmapped val"++val23).postln;
+				val23 = (val23 - 0.025)/0.075;
+				("mapped val"++val23).postln;
+
+				~rateBus[12].set(~pent_ratios.wrapAt(val23));
+
+
+				 if ( ~button_gates[12] == 0, {
+				~button_gates.put(12, 1); "button 8 pressed".postln;
+				~grain12 = Synth(\grainSampler,[\bufnum, ~sus,
+				\envbuf, ~sineEnv,
+				\posBus, ~posBus[12].index,
+				\release, ~relSpec.map(val23),
+				\rateBus, ~rateBus[12].index,
+				\amp, 1,
+				\out, 0 ], ~synthGroup);
+				});
+			}, {
+				 if ( ~button_gates[12] == 1, {
+
+					~grain12.set(\gate, 0);
+					~button_gates.put(12, 0); "button 8 unpressed".postln;
+				});
+			});
+
+			if ( val25 != 0,  {
+				("unmapped val"++val25).postln;
+				val25 = (val25 - 0.025)/0.075;
+				("mapped val"++val25).postln;
+
+				~rateBus[13].set(~pent_ratios.wrapAt(val25));
+
+				 if ( ~button_gates[13] == 0, {
+				~button_gates.put(13, 1); "button 10 pressed".postln;
+				~grain13 = Synth(\grainSampler,[\bufnum, ~sus,
+				\envbuf, ~sineEnv,
+				\posBus, ~posBus[13].index,
+				\release, ~relSpec.map(val25),
+				\rateBus, ~rateBus[13].index,
+				\amp, 1,
+				\out, 0 ], ~synthGroup);
+				});
+			}, {
+				 if ( ~button_gates[13] == 1, {
+
+					~grain13.set(\gate, 0);
+					~button_gates.put(13, 0); "button 10 unpressed".postln;
+				});
+			});
+
+			if ( val27 != 0,  {
+				("unmapped val"++val27).postln;
+				val27 = (val27 - 0.025)/0.075;
+				("mapped val"++val27).postln;
+
+				~rateBus[14].set(~pent_ratios.wrapAt(val27));
+
+				 if ( ~button_gates[14] == 0, {
+				~button_gates.put(14, 1); "button 12 pressed".postln;
+				~grain14 = Synth(\grainSampler,[\bufnum, ~sus,
+				\envbuf, ~sineEnv,
+				\posBus, ~posBus[14].index,
+				\release, ~relSpec.map(val27),
+				\rateBus, ~rateBus[14].index,
+				\amp, 1,
+				\out, 0 ], ~synthGroup);
+				});
+			}, {
+				 if ( ~button_gates[14] == 1, {
+
+					~grain14.set(\gate, 0);
+					~button_gates.put(14, 0); "button 12 unpressed".postln;
+				});
+			});
+
+			if ( val29 != 0,  {
+				("unmapped val"++val29).postln;
+				val29 = (val29 - 0.025)/0.075;
+				("mapped val"++val29).postln;
+
+				~rateBus[15].set(~pent_ratios.wrapAt(val29));
+
+				 if ( ~button_gates[15] == 0, {
+				~button_gates.put(15, 1); "button 14 pressed".postln;
+				~grain15 = Synth(\grainSampler,[\bufnum, ~sus,
+				\envbuf, ~sineEnv,
+				\posBus, ~posBus[15].index,
+				\release, ~relSpec.map(val29),
+				\rateBus, ~rateBus[15].index,
+				\amp, 1,
+				\out, 0 ], ~synthGroup);
+				});
+			}, {
+				 if ( ~button_gates[15] == 1, {
+
+					~grain15.set(\gate, 0);
+					~button_gates.put(15, 0); "button 14 unpressed".postln;
+				});
+			});
 
 	}, "/craft");
 
