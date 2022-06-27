@@ -172,13 +172,18 @@ Synth(\recorder, [\in, 0, \thresh, 0.6, \fftbuf, ~craft_fftbuf_right, \recbuf, ~
 
 
 
+
+
+
 /*GROUPS AND BUSES */
 ~synthGroup = Group.new;
 ~grainbufGroup = Group.new(~synthGroup);
 ~effectGroup = Group.after(~synthGroup);
 ~nyquist = s.sampleRate * 0.5;
 
-~combBuses = Array.fill(2, { Bus.audio(s, 1); });
+~combBus = Bus.audio(s, 1);
+~allpassBus = Bus.audio(s, 1);
+~verbBus = Bus.audio(s, 2);
 
 ~clocks = Array.fill(4, { TempoClock.new(1); });
 
@@ -215,8 +220,9 @@ Synth(\recorder, [\in, 0, \thresh, 0.6, \fftbuf, ~craft_fftbuf_right, \recbuf, ~
 ~posBus = Array.fill(16, {|i| Bus.control(s, 1).set(i*0.125); });
 ~rateBus = Array.fill(16, {|i| Bus.control(s, 1).set(1); });
 
-~comb_synths = Array.fill(2, {|i| Synth(\combc, [\in, ~combBuses[i], \mix, 0.0 ], ~effectGroup);
-		});
+~comb_synth = Synth(\combc, [\in, ~combBus, \mix, 0.0 ], ~effectGroup);
+~allpass_synth = Synth(\allpassc, [\in, ~allpassBus, \mix, 0.0 ], ~effectGroup);
+~stereoverb_synth = Synth(\stereo_verb, [\in, ~verbBus, \mix, 0.0], ~effectGroup);
 //s.sync;
 
 OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val17,val19, val21,val23,val25,val27,val29;
@@ -255,7 +261,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val0),
 				\rateBus, ~rateBus[0].index,
 				\amp, 1,
-				\out, ~combBuses[0] ], ~synthGroup);
+				\out, ~combBus ], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[0] == 1, {
@@ -281,7 +287,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val2),
 				\rateBus, ~rateBus[1].index,
 				\amp, 1,
-				\out, ~combBuses[0] ], ~synthGroup);
+				\out, ~combBus ], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[1] == 1, {
@@ -306,7 +312,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val4),
 				\rateBus, ~rateBus[2].index,
 				\amp, 1,
-				\out, ~combBuses[0] ], ~synthGroup);
+				\out, ~combBus ], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[2] == 1, {
@@ -331,7 +337,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val6),
 				\rateBus, ~rateBus[3].index,
 				\amp, 1,
-				\out, ~combBuses[0] ], ~synthGroup);
+				\out, ~combBus], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[3] == 1, {
@@ -357,7 +363,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val8),
 				\rateBus, ~rateBus[4].index,
 				\amp, 1,
-				\out, ~combBuses[0] ], ~synthGroup);
+				\out, ~combBus ], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[4] == 1, {
@@ -382,7 +388,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val10),
 				\rateBus, ~rateBus[5].index,
 				\amp, 1,
-				\out, ~combBuses[0] ], ~synthGroup);
+				\out, ~combBus ], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[5] == 1, {
@@ -407,7 +413,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val12),
 				\rateBus, ~rateBus[6].index,
 				\amp, 1,
-				\out, ~combBuses[0]  ], ~synthGroup);
+				\out, ~combBus ], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[6] == 1, {
@@ -432,7 +438,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val14),
 				\rateBus, ~rateBus[7].index,
 				\amp, 1,
-				\out, ~combBuses[0] ], ~synthGroup);
+				\out, ~combBus ], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[7] == 1, {
@@ -460,7 +466,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val15),
 				\rateBus, ~rateBus[8].index,
 				\amp, 1,
-				\out, ~combBuses[1]  ], ~synthGroup);
+				\out, ~allpassBus  ], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[8] == 1, {
@@ -486,7 +492,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val17),
 				\rateBus, ~rateBus[9].index,
 				\amp, 1,
-				\out, ~combBuses[1] ], ~synthGroup);
+				\out, ~allpassBus], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[9] == 1, {
@@ -511,7 +517,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val19),
 				\rateBus, ~rateBus[10].index,
 				\amp, 1,
-				\out, ~combBuses[1] ], ~synthGroup);
+				\out, ~allpassBus], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[10] == 1, {
@@ -536,7 +542,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val21),
 				\rateBus, ~rateBus[11].index,
 				\amp, 1,
-				\out, ~combBuses[1] ], ~synthGroup);
+				\out, ~allpassBus ], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[11] == 1, {
@@ -562,7 +568,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val23),
 				\rateBus, ~rateBus[12].index,
 				\amp, 1,
-				\out, ~combBuses[1] ], ~synthGroup);
+				\out, ~allpassBus ], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[12] == 1, {
@@ -587,7 +593,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val25),
 				\rateBus, ~rateBus[13].index,
 				\amp, 1,
-				\out, ~combBuses[1] ], ~synthGroup);
+				\out, ~allpassBus ], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[13] == 1, {
@@ -612,7 +618,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val27),
 				\rateBus, ~rateBus[14].index,
 				\amp, 1,
-				\out, ~combBuses[1] ], ~synthGroup);
+				\out, ~allpassBus ], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[14] == 1, {
@@ -637,7 +643,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				\release, ~relSpec.map(val29),
 				\rateBus, ~rateBus[15].index,
 				\amp, 1,
-				\out, ~combBuses[1] ], ~synthGroup);
+				\out, ~allpassBus ], ~synthGroup);
 				});
 			}, {
 				 if ( ~button_gates[15] == 1, {
@@ -704,10 +710,11 @@ OSCdef(\trillring, {|msg|
 			//msg.postln;
 
 			if ( x_val != 0, {
+				if ( x_val > 0.01, {
 				//x_val.postln;
-				~comb_synths[0].set(\mix, x_val); });
+				~comb_synth.set(\mix, x_val); }); });
 			if ( msg[3] > 1, {
-				~comb_synths[0].set(\delmod, ~delmodSpec.map(x_val));
+				~comb_synth.set(\delmod, ~delmodSpec.map(x_val));
 			});
 
 		}, '/ring');
@@ -718,9 +725,9 @@ OSCdef(\trillhex, {|msg|
 
 			if ( x_val != 0, {
 				//x_val.postln;
-				~comb_synths[1].set(\mix, x_val); });
+				~allpass_synth.set(\mix, x_val); });
 			if ( msg[3] > 1, {
-				~comb_synths[1].set(\delmod, ~delmodSpec.map(x_val));
+				~allpass_synth.set(\delmod, ~delmodSpec.map(x_val));
 			});
 
 		}, '/hex');
@@ -733,9 +740,13 @@ OSCdef(\trillhex, {|msg|
 ~trateBus = Bus.control(s, 1).set(10);
 ~durBus = Bus.control(s, 1).set(0.25);
 ~grainPosBus = Bus.control(s, 1).set(0.25);
-~trateSpec = [0.1, 30.0, -4, 0.1].asSpec;
-~durSpec = [0.5, 0.0001, -4, 0.001].asSpec;
+~grainpitchBus = Bus.control(s, 1).set(1);
+~grainampBus = Bus.control(s, 1).set(0.75);
+~trateSpec = [0.1, 50.0, -4, 0.1].asSpec;
+~durSpec = [2.0, 0.0001, -4, 0.001].asSpec;
 ~grainPosSpec = [0.0, 0.9, \linear, 0.001].asSpec;
+~grainAmpSpec = [0.75, 4.0, -4, 0.001].asSpec;
+
 
 OSCdef(\trillflex, {|msg|
 			var fingers = msg[3];
@@ -744,7 +755,7 @@ OSCdef(\trillflex, {|msg|
 			if ( fingers > 0, {
 				if ( ~grainbuf_switch == 0, {
 
-					Synth(\buf_grain, [\sndbuf, ~craft_buffer_left, \envbuf, ~grainbufenv, \trateBus, ~trateBus.index, \durBus,~durBus.index,\posBus, ~grainPosBus.index ], ~grainbufGroup);
+					Synth(\buf_grain, [\sndbuf, ~craft_buffer_left, \envbuf, ~grainbufenv, \trateBus, ~trateBus.index, \durBus,~durBus.index,\posBus, ~grainPosBus.index, \rateBus, ~grainpitchBus.index, \ampBus,~grainampBus.index, \out, ~verbBus ], ~grainbufGroup);
 
 					~grainbuf_switch = 1; "switch grainbuf on".postln; }); },
 			    {
@@ -752,11 +763,17 @@ OSCdef(\trillflex, {|msg|
 					~grainbufGroup.set(\gate, 0);
 				~grainbuf_switch = 0; "switch grainbuf off".postln; });
 			    });
+			if ( fingers > 1, {
+				~grainPosBus.set(~grainPosSpec.map(msg[6])); });
+			if ( fingers > 2, {
+				~stereoverb_synth.set(\mix, msg[8]); });
 
 			msg.postln;
+			~grainpitchBus.set(~tone_collection.wrapAt(~tuner.map(x_val)));
 			~trateBus.set(~trateSpec.map(x_val));
 			~durBus.set(~durSpec.map(x_val));
-			~grainPosBus.set(~grainPosSpec.map(y_val));
+
+			~grainampBus.set(~grainAmpSpec.map(y_val));
 
 		}, '/flex');
 
@@ -769,3 +786,8 @@ OSCdef(\trillflex, {|msg|
 };
 
 );
+
+
+
+
+
