@@ -377,8 +377,8 @@ var sc = ~pentatetra2;
 //~sus = Buffer.read(s, "/root/Bela/projects/craft_livecoding/Sus_sound2.wav");
 /*8 buffers voor links + 8 voor rechts met verschillende thresholds */
 
-~craft_buffer_left = Buffer.alloc(s, 22050*3, 1);
-~craft_buffer_right = Buffer.alloc(s, 22050*6, 1);
+~craft_buffer_left = Buffer.alloc(s, 22050*1, 1);
+~craft_buffer_right = Buffer.alloc(s, 22050*2, 1);
 
 ~craft_fftbuf_left = Buffer.alloc(s, 512);
 ~craft_fftbuf_right = Buffer.alloc(s, 512);
@@ -400,7 +400,7 @@ Synth(\recorder, [\in, 0, \thresh, 0.6, \fftbuf, ~craft_fftbuf_right, \recbuf, ~
 /*GROUPS AND BUSES */
 ~synthGroup = Group.new;
 ~grainbufGroup = Group.new(~synthGroup);
-~craftGroups = Array.fill(15, { Group.new(~synthGroup); });
+~craftGroups = Array.fill(16, { Group.new(~synthGroup); });
 ~effectGroup = Group.after(~synthGroup);
 ~nyquist = s.sampleRate * 0.5;
 
@@ -435,7 +435,7 @@ Synth(\recorder, [\in, 0, \thresh, 0.6, \fftbuf, ~craft_fftbuf_right, \recbuf, ~
 
 
 
-~button_gates = [0, 0];
+
 	~rec_gate = 0;
 	~comb_gate = 0;
 
@@ -448,6 +448,14 @@ Synth(\recorder, [\in, 0, \thresh, 0.6, \fftbuf, ~craft_fftbuf_right, \recbuf, ~
 ~stereoverb_synth = Synth(\stereo_verb, [\in, ~verbBus, \mix, 0.0], ~effectGroup);
 //s.sync;
 
+
+
+
+~checkRoutine = Routine({ inf.do{
+		~button_gates.do{|item, i| if ( item == 1, { (" button still pressed : "++i).postln;  }); };
+		0.1.wait;
+	};
+	}).play;
 
 
 
@@ -685,7 +693,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 
 
 				 if ( ~button_gates[8] == 0, {
-				~button_gates.put(8, 1); "button 0 pressed".postln;
+				~button_gates.put(8, 1); "button 15 pressed".postln;
 				~grain8 = Synth(\grainSampler,[\bufnum, ~craft_buffer_right,
 				\envbuf, ~sineEnv,
 				\posBus, ~posBus[8].index,
@@ -698,7 +706,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				 if ( ~button_gates[8] == 1, {
 
 				~craftGroups[8].set(\gate, 0);
-					~button_gates.put(8, 0); "button unpressed".postln;
+					~button_gates.put(8, 0); "button 15 unpressed".postln;
 				});
 			});
 
@@ -711,7 +719,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 
 
 				 if ( ~button_gates[9] == 0, {
-				~button_gates.put(9, 1); "button 2 pressed".postln;
+				~button_gates.put(9, 1); "button 17 pressed".postln;
 				~grain9 = Synth(\grainSampler,[\bufnum, ~craft_buffer_right,
 				\envbuf, ~sineEnv,
 				\posBus, ~posBus[9].index,
@@ -724,7 +732,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				 if ( ~button_gates[9] == 1, {
 
 					~craftGroups[9].set(\gate, 0);
-					~button_gates.put(9, 0); "button 2 unpressed".postln;
+					~button_gates.put(9, 0); "button 17 unpressed".postln;
 				});
 			});
 
@@ -736,7 +744,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 
 
 				 if ( ~button_gates[10] == 0, {
-				~button_gates.put(10, 1); "button 4 pressed".postln;
+				~button_gates.put(10, 1); "button 19 pressed".postln;
 				~grain10 = Synth(\grainSampler,[\bufnum, ~craft_buffer_right,
 				\envbuf, ~sineEnv,
 				\posBus, ~posBus[10].index,
@@ -749,7 +757,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				 if ( ~button_gates[10] == 1, {
 
 					~craftGroups[10].set(\gate, 0);
-					~button_gates.put(10, 0); "button 4 unpressed".postln;
+					~button_gates.put(10, 0); "button 19 unpressed".postln;
 				});
 			});
 
@@ -761,7 +769,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				//~rateBus[11].set(~pent_ratios.wrapAt(val21));
 
 				 if ( ~button_gates[11] == 0, {
-				~button_gates.put(11, 1); "button 6 pressed".postln;
+				~button_gates.put(11, 1); "button 21 pressed".postln;
 				~grain11 = Synth(\grainSampler,[\bufnum, ~craft_buffer_right,
 				\envbuf, ~sineEnv,
 				\posBus, ~posBus[11].index,
@@ -774,7 +782,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				 if ( ~button_gates[11] == 1, {
 
 					~craftGroups[11].set(\gate, 0);
-					~button_gates.put(11, 0); "button 6 unpressed".postln;
+					~button_gates.put(11, 0); "button 21 unpressed".postln;
 				});
 			});
 
@@ -787,7 +795,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 
 
 				 if ( ~button_gates[12] == 0, {
-				~button_gates.put(12, 1); "button 8 pressed".postln;
+				~button_gates.put(12, 1); "button 23 pressed".postln;
 				~grain12 = Synth(\grainSampler,[\bufnum, ~craft_buffer_right,
 				\envbuf, ~sineEnv,
 				\posBus, ~posBus[12].index,
@@ -800,7 +808,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				 if ( ~button_gates[12] == 1, {
 
 					~craftGroups[12].set(\gate, 0);
-					~button_gates.put(12, 0); "button 8 unpressed".postln;
+					~button_gates.put(12, 0); "button 23 unpressed".postln;
 				});
 			});
 
@@ -812,7 +820,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				//~rateBus[13].set(~pent_ratios.wrapAt(val25));
 
 				 if ( ~button_gates[13] == 0, {
-				~button_gates.put(13, 1); "button 10 pressed".postln;
+				~button_gates.put(13, 1); "button 25 pressed".postln;
 				~grain13 = Synth(\grainSampler,[\bufnum, ~craft_buffer_right,
 				\envbuf, ~sineEnv,
 				\posBus, ~posBus[13].index,
@@ -825,7 +833,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				 if ( ~button_gates[13] == 1, {
 
 					~craftGroups[13].set(\gate, 0);
-					~button_gates.put(13, 0); "button 10 unpressed".postln;
+					~button_gates.put(13, 0); "button 25 unpressed".postln;
 				});
 			});
 
@@ -837,7 +845,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				//~rateBus[14].set(~pent_ratios.wrapAt(val27));
 
 				 if ( ~button_gates[14] == 0, {
-				~button_gates.put(14, 1); "button 12 pressed".postln;
+				~button_gates.put(14, 1); "button 27 pressed".postln;
 				~grain14 = Synth(\grainSampler,[\bufnum, ~craft_buffer_right,
 				\envbuf, ~sineEnv,
 				\posBus, ~posBus[14].index,
@@ -850,7 +858,7 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				 if ( ~button_gates[14] == 1, {
 
 					~craftGroups[14].set(\gate, 0);
-					~button_gates.put(14, 0); "button 12 unpressed".postln;
+					~button_gates.put(14, 0); "button 27 unpressed".postln;
 				});
 			});
 
@@ -862,20 +870,20 @@ OSCdef(\craft, {|msg| var val0,val2,val4,val6,val8,val10, val12,val14,val15,val1
 				//~rateBus[15].set(~pent_ratios.wrapAt(val29));
 
 				 if ( ~button_gates[15] == 0, {
-				~button_gates.put(15, 1); "button 14 pressed".postln;
+				~button_gates.put(15, 1); "button 29 pressed".postln;
 				~grain15 = Synth(\grainSampler,[\bufnum, ~craft_buffer_right,
 				\envbuf, ~sineEnv,
 				\posBus, ~posBus[15].index,
 				\release, ~relSpec.map(val29),
 				\rateBus, ~rateBus[15].index,
 				\amp, 1,
-				\out, ~allpassBus ], ~craftGroups[15]);
+				\out, ~allpassBus ], ~craftGroups[15] );
 				});
 			}, {
 				 if ( ~button_gates[15] == 1, {
 
 					~craftGroups[15].set(\gate, 0);
-					~button_gates.put(15, 0); "button 14 unpressed".postln;
+					~button_gates.put(15, 0); "button 29 unpressed".postln;
 				});
 			});
 
