@@ -1,0 +1,15 @@
+[Unit]
+Description=external numpad to SuperCollider via OSC
+After=network-online.target
+
+[Service]
+ExecStart=/root/Bela/projects/ext_numpad/ext_numpad
+Type=simple
+Restart=always
+RestartSec=1
+WorkingDirectory=/root/Bela/projects/ext_numpad
+Environment=HOME=/root
+KillMode=process
+
+[Install]
+WantedBy=default.target
